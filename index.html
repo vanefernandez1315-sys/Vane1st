@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Control de Food Cost, recetas, insumos, ventas e inventarios por marca y unidad.">
+<title>Food Cost – Control de costos de ventas y operaciones</title>
+<style>
+:root{--green:#176b4d;--green2:#e7f3ed;--ink:#20312a;--muted:#6c7a73;--line:#dce5df;--bg:#f4f7f5;--red:#b42318;--redbg:#fff0ee;--yellow:#946200;--yellowbg:#fff7df;--blue:#245d9c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial}
+header{background:var(--green);color:white;padding:22px clamp(16px,4vw,44px) 18px}
+.top{max-width:1500px;margin:auto;display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap}
+h1{font-size:clamp(21px,3vw,30px);margin:0 0 5px;letter-spacing:-.5px}header p{margin:0;color:#d7eee2}
+.config{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#ffffff14;border:1px solid #ffffff40;padding:12px 14px;border-radius:12px}
+.config label{font-size:12px;color:#e7f4ec;display:block}.config input[type=number]{width:84px}
+main{max-width:1500px;margin:22px auto;padding:0 clamp(12px,3vw,36px) 48px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+select,input,button{font:inherit}input,select{border:1px solid #cbd7cf;border-radius:8px;padding:8px 9px;background:#fff;color:var(--ink);min-width:0}input:focus,select:focus{outline:2px solid #91cbb0;border-color:var(--green)}
+button{border:0;border-radius:8px;padding:9px 13px;cursor:pointer;font-weight:650;background:var(--green);color:#fff}button.secondary{background:#e8efea;color:#29483a}button.danger{background:#fff0ee;color:#a32820}button.small{padding:6px 9px;font-size:12px}
+.tabs{display:flex;gap:5px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow:auto}
+.tab{white-space:nowrap;background:transparent;color:var(--muted);border-radius:9px 9px 0 0;padding:12px 18px;border-bottom:3px solid transparent}
+.tab.active{color:var(--green);background:white;border-bottom-color:var(--green)}
+.panel{display:none}.panel.active{display:block}
+.grid{display:grid;gap:14px}.kpis{grid-template-columns:repeat(5,minmax(0,1fr));margin-bottom:16px}
+.card{background:white;border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0;box-shadow:0 2px 8px #1a382408}
+.kpi-label{font-size:12px;color:var(--muted);font-weight:650}.kpi-value{font-size:clamp(20px,2.2vw,28px);font-weight:760;letter-spacing:-.5px;margin:7px 0 3px}.kpi-sub{font-size:12px;color:var(--muted)}
+.split{grid-template-columns:1.1fr .9fr}.section-title{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:0 0 12px;flex-wrap:wrap}.section-title h2{font-size:17px;margin:0}
+.alert{padding:14px 16px;border-radius:12px;margin-bottom:15px;border:1px solid var(--line);background:white}
+.alert.red{background:var(--redbg);border-color:#f1c2bd;color:#84221a}.alert.yellow{background:var(--yellowbg);border-color:#f0d98d;color:#755100}.alert.green{background:var(--green2);border-color:#c4e0cf;color:#20583d}
+.badge{display:inline-block;border-radius:20px;padding:4px 8px;font-size:11px;font-weight:750;background:#edf1ee;color:#506158;white-space:nowrap}.badge.good{background:#e5f5eb;color:#176b4d}.badge.warn{background:#fff3ce;color:#805900}.badge.bad{background:#ffe7e4;color:#a32920}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;min-width:760px;background:white}th,td{padding:9px 10px;border-bottom:1px solid #e8eeea;text-align:left;vertical-align:middle}th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#64746b;background:#f7faf8;position:sticky;top:0;z-index:1}td{font-size:13px}td input,td select{width:100%;min-width:70px;padding:7px 8px}td.num,th.num{text-align:right}td.num{font-variant-numeric:tabular-nums}tr:last-child td{border-bottom:0}
+.barlist{display:grid;gap:13px}.barrow{display:grid;grid-template-columns:minmax(110px,1fr) minmax(100px,2fr) 62px;gap:10px;align-items:center}.barname{font-size:13px;font-weight:650}.track{height:13px;background:#edf1ee;border-radius:10px;position:relative;overflow:visible}.fill{height:100%;border-radius:10px;min-width:2px}.marker{position:absolute;top:-5px;bottom:-5px;width:2px;background:#34463c;opacity:.8}.barvalue{text-align:right;font-weight:750;font-size:13px}
+.muted{color:var(--muted)}.subhead{font-size:12px;color:var(--muted);margin:0 0 10px}
+.formrow{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:12px;color:var(--muted);font-weight:650}.field input,.field select{min-width:140px}
+.recipe-layout{grid-template-columns:270px minmax(0,1fr)}.recipe-list{display:grid;gap:8px}.recipe-pick{background:white;border:1px solid var(--line);color:var(--ink);text-align:left}.recipe-pick.selected{border-color:var(--green);background:var(--green2);color:var(--green)}
+.recipe-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px}.mini{background:#f6f9f7;border-radius:10px;padding:12px}.mini small{display:block;color:var(--muted);font-size:11px}.mini strong{display:block;font-size:18px;margin-top:5px}
+.footer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.note{font-size:12px;color:var(--muted);margin-top:10px}
+@media(max-width:1050px){.kpis{grid-template-columns:repeat(3,1fr)}.split{grid-template-columns:1fr}.recipe-summary{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:650px){header{padding:18px 14px}.config{width:100%}.kpis{grid-template-columns:repeat(2,1fr)}.recipe-layout{grid-template-columns:1fr}.recipe-summary{grid-template-columns:repeat(2,1fr)}.barrow{grid-template-columns:100px 1fr 52px}.card{padding:12px}.tab{padding:10px 12px}}
+
+#cloudStatus{font-size:12px;padding:6px 10px;border-radius:20px;background:#ffffff22;border:1px solid #ffffff55;color:#fff}
+#cloudStatus.offline{background:#fff3ce;color:#805900;border-color:#f0d98d}
+#cloudStatus.error{background:#ffe7e4;color:#a32920;border-color:#f1c2bd}
+#authBar{max-width:1500px;margin:14px auto 0;padding:0 clamp(12px,3vw,36px);display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+#authBar input{background:#fff}#authMessage{font-size:12px;color:var(--muted)}
+</style></head>
+<body>
+<header><div class="top"><div><h1>Food Cost – Control de costos de ventas y operaciones</h1><p>Control integrado de recetas, ventas, inventarios y desviaciones</p></div>
+<div class="config"><div><label for="goal">Meta de Food Cost %</label><input id="goal" type="number" min="1" max="100" step=".1" value="30"></div><label style="display:flex;gap:8px;align-items:center"><input id="pricesTax" type="checkbox" checked> Precios incluyen IGV (18%)</label><span id="cloudStatus" class="offline">Sin conexión a nube</span></div></div></header>
+<div id="authBar"><input id="authEmail" type="email" placeholder="Correo de acceso" autocomplete="username"><input id="authPassword" type="password" placeholder="Contraseña" autocomplete="current-password"><button id="signIn">Ingresar</button><button id="signUp" class="secondary">Crear usuario</button><button id="signOut" class="secondary" hidden>Cerrar sesión</button><span id="authMessage">Los datos se sincronizarán con Supabase cuando configures tu proyecto.</span></div>
+<main>
+<div class="controls"><div class="field"><label>Marca</label><select id="brand"><option>Barra Chalaca</option><option>El Bodegón</option></select></div><div class="field"><label>Unidad</label><select id="unit"><option>San Isidro</option><option>Patio Panorama</option><option>Santa Catalina</option><option>Unidad 4</option><option>Unidad 5</option></select></div><div class="field"><label>Periodo de control</label><input id="period" type="month" value="2026-11"></div><div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap"><button class="secondary" id="export">Exportar datos</button><button class="secondary" id="importBtn">Importar datos</button><input id="importFile" type="file" accept=".json,application/json" hidden><button class="secondary" id="reset">Restaurar ejemplo</button></div></div>
+<div class="tabs"><button class="tab active" data-tab="summary">Resumen</button><button class="tab" data-tab="ingredients">Insumos</button><button class="tab" data-tab="recipes">Recetas</button><button class="tab" data-tab="actual">Ventas y consumo real</button></div>
+<section id="summary" class="panel active">
+<div id="mainAlert" class="alert green"></div>
+<div class="grid kpis" id="kpis"></div>
+<div class="grid split"><div class="card"><div class="section-title"><h2>Food Cost por plato</h2><span class="badge">Meta: <span id="goalLabel">30%</span></span></div><div class="barlist" id="bars"></div><p class="note">La línea vertical marca la meta. Verde: dentro de meta; amarillo: hasta 1 punto por encima; rojo: más de 1 punto por encima.</p></div>
+<div class="card"><div class="section-title"><h2>Desvíos principales de insumos</h2><span class="muted" style="font-size:12px">Impacto en S/</span></div><div id="topDeviations"></div></div></div>
+<div class="card" style="margin-top:14px"><div class="section-title"><h2>Detalle por plato</h2><span class="muted" style="font-size:12px">Precio sugerido para alcanzar la meta</span></div><div class="table-wrap"><table><thead><tr><th>Plato</th><th class="num">Unid. vendidas</th><th class="num">Precio venta</th><th class="num">Costo teórico/u</th><th class="num">FC teórico</th><th class="num">FC real asignado</th><th class="num">Precio sugerido</th></tr></thead><tbody id="dishTable"></tbody></table></div></div>
+</section>
+<section id="ingredients" class="panel"><div class="card"><div class="section-title"><h2>Maestro de insumos</h2><button id="addIngredient">+ Agregar insumo</button></div><p class="subhead">El costo aprovechable incorpora la merma. Registra el costo de compra por unidad y la merma estimada.</p><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Unidad</th><th class="num">Costo compra (S/)</th><th class="num">Merma %</th><th class="num">Costo aprovechable</th><th></th></tr></thead><tbody id="ingredientTable"></tbody></table></div></div></section>
+<section id="recipes" class="panel"><div class="grid recipe-layout"><div class="card"><div class="section-title"><h2>Recetas</h2><button id="addRecipe" class="small">+ Crear</button></div><div class="recipe-list" id="recipeList"></div><div class="footer-actions"><button id="deleteRecipe" class="danger small">Eliminar receta</button></div></div><div class="card"><div class="section-title"><h2>Ficha por porción</h2><span class="badge" id="recipeStatus">Editable</span></div><div class="formrow" style="margin-bottom:14px"><div class="field" style="flex:1"><label>Nombre del plato</label><input id="recipeName"></div><div class="field"><label>Precio de venta (S/)</label><input id="recipePrice" type="number" min="0" step=".01"></div></div><div class="section-title"><h3 style="margin:0;font-size:14px">Ingredientes por porción</h3><button id="addRecipeLine" class="secondary small">+ Ingrediente</button></div><div class="table-wrap"><table><thead><tr><th>Ingrediente</th><th>Unidad</th><th class="num">Cantidad aprovechable</th><th class="num">Costo (S/)</th><th class="num">% del costo</th><th></th></tr></thead><tbody id="recipeLines"></tbody></table></div><div class="recipe-summary" id="recipeMetrics"></div><p class="note">La cantidad se registra en unidad aprovechable. El costo de receta convierte automáticamente a cantidad de compra considerando la merma.</p></div></div></section>
+<section id="actual" class="panel"><div class="card"><div class="section-title"><h2>Unidades vendidas por plato</h2><span class="muted" style="font-size:12px">Periodo seleccionado</span></div><div class="table-wrap"><table><thead><tr><th>Plato</th><th class="num">Unidades vendidas</th><th class="num">Venta neta</th><th class="num">Costo teórico total</th></tr></thead><tbody id="salesTable"></tbody></table></div></div>
+<div class="card" style="margin-top:14px"><div class="section-title"><h2>Inventario y consumo por insumo</h2><span class="muted" style="font-size:12px">Inicial + compras − final</span></div><div class="table-wrap"><table><thead><tr><th>Insumo</th><th>Unidad</th><th class="num">Inventario inicial</th><th class="num">Compras</th><th class="num">Inventario final</th><th class="num">Consumo real</th><th class="num">Consumo teórico</th><th class="num">Dif. unidades</th><th class="num">Dif. S/</th></tr></thead><tbody id="actualTable"></tbody></table></div><p class="note">Diferencia positiva = consumo real por encima del teórico (posible pérdida, sobreporcionado o registro pendiente). La valorización real usa costo promedio ponderado: (inventario inicial valorizado + compras valorizadas) ÷ unidades disponibles.</p></div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./supabase-config.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const uid=()=>Math.random().toString(36).slice(2,10);
+const seed={
+ ingredients:[
+ ['Lomo fino','kg',38,8],['Cebolla roja','kg',4.8,12],['Tomate','kg',5.5,8],['Papa amarilla','kg',6.2,18],['Arroz','kg',4.5,1],['Pescado fresco','kg',32,15],['Limón','kg',6,35],['Ají amarillo','kg',10,18],['Pechuga de pollo','kg',14,8],['Pan','kg',8,3],['Leche evaporada','L',5.5,0],['Nuez pecana','kg',42,5],['Choclo','kg',7,20],['Camote','kg',4.2,15],['Maíz morado','kg',5,8],['Azúcar','kg',4.2,0]
+ ].map(x=>({id:uid(),name:x[0],unit:x[1],cost:x[2],waste:x[3]})),
+ recipes:[
+ {name:'Lomo saltado',price:42,lines:[]},{name:'Ceviche clásico',price:38,lines:[]},{name:'Ají de gallina',price:32,lines:[]},{name:'Chicha morada',price:9,lines:[]}
+ ],
+ sales:{},stock:{}
+};
+function setLines(){
+ const by=n=>state.ingredients.find(i=>i.name===n)?.id;
+ state.recipes[0].lines=[[by('Lomo fino'),.18],[by('Cebolla roja'),.08],[by('Tomate'),.07],[by('Papa amarilla'),.18],[by('Arroz'),.12]].map(([id,qty])=>({id,qty}));
+ state.recipes[1].lines=[[by('Pescado fresco'),.18],[by('Limón'),.12],[by('Cebolla roja'),.04],[by('Ají amarillo'),.015],[by('Camote'),.08],[by('Choclo'),.06]].map(([id,qty])=>({id,qty}));
+ state.recipes[2].lines=[[by('Pechuga de pollo'),.15],[by('Pan'),.04],[by('Leche evaporada'),.08],[by('Nuez pecana'),.012],[by('Arroz'),.12]].map(([id,qty])=>({id,qty}));
+ state.recipes[3].lines=[[by('Maíz morado'),.045],[by('Azúcar'),.025],[by('Limón'),.015]].map(([id,qty])=>({id,qty}));
+}
+let state=JSON.parse(JSON.stringify(seed));setLines();let selectedRecipe=0;
+function currentKey(){return $('brand').value+'|'+$('unit').value+'|'+$('period').value}
+function ensure(){let k=currentKey();if(!state.sales[k])state.sales[k]=state.recipes.map((r,i)=>({qty:[80,95,65,120][i]||0}));if(!state.stock[k])state.stock[k]=state.ingredients.map((x,i)=>({initial:[18,10,8,9,5,12,10,3,8,4,8,1,5,4,4,3][i]||0,buy:[14,8,8,7,4,10,9,2,6,3,4,.5,4,3,2,2][i]||0,final:[12,7,6,6,3,8,6,2,6,2,5,.5,3,2,3,2][i]||0,buyCost:x.cost}));}
+let supabaseClient=null, currentUser=null, saveTimer=null, lastCloudSave=0;
+const CLOUD_TABLE='food_cost_workspaces';
+function setCloudStatus(message,kind=''){$('cloudStatus').textContent=message;$('cloudStatus').className=kind;}
+function setAuthMessage(message){$('authMessage').textContent=message;}
+function saveLocal(){try{localStorage.setItem('foodcost-control-v1',JSON.stringify(state))}catch(e){}}
+function save(){saveLocal();if(!supabaseClient||!currentUser)return;clearTimeout(saveTimer);saveTimer=setTimeout(saveCloud,700)}
+async function saveCloud(){if(!supabaseClient||!currentUser)return;setCloudStatus('Guardando…');try{const {error}=await supabaseClient.from(CLOUD_TABLE).upsert({user_id:currentUser.id,workspace_key:'foodcost-control-v1',data:state,updated_at:new Date().toISOString()},{onConflict:'user_id,workspace_key'});if(error)throw error;lastCloudSave=Date.now();setCloudStatus('Sincronizado');setAuthMessage('Cambios guardados en tu cuenta de Supabase.')}catch(err){console.error('Supabase save:',err);setCloudStatus('Error de sincronización','error');setAuthMessage('No se pudo guardar en la nube. Tus cambios siguen guardados en este navegador. '+(err.message||''));}}
+async function loadCloud(){if(!supabaseClient||!currentUser)return;setCloudStatus('Cargando…');try{const {data,error}=await supabaseClient.from(CLOUD_TABLE).select('data').eq('user_id',currentUser.id).eq('workspace_key','foodcost-control-v1').maybeSingle();if(error)throw error;if(data?.data&&data.data.ingredients&&data.data.recipes){state=data.data;selectedRecipe=0;renderAll();setAuthMessage('Se cargaron tus datos guardados en Supabase.')}else{await saveCloud();setAuthMessage('Se creó tu espacio de trabajo en la nube con los datos actuales.')}setCloudStatus('Sincronizado');}catch(err){console.error('Supabase load:',err);setCloudStatus('Error de sincronización','error');setAuthMessage('No se pudieron cargar los datos de la nube. Revisa las tablas y políticas de Supabase. '+(err.message||''));}}
+function updateAuthUI(){const signed=!!currentUser;$('signOut').hidden=!signed;$('signIn').hidden=signed;$('signUp').hidden=signed;$('authEmail').hidden=signed;$('authPassword').hidden=signed;if(signed){setCloudStatus('Conectado a la nube');setAuthMessage('Sesión iniciada: '+(currentUser.email||'usuario'));}}
+async function initCloud(){const cfg=window.FOODCOST_SUPABASE||{};if(!window.supabase||!cfg.url||!cfg.anonKey){setCloudStatus('Modo local','offline');setAuthMessage('Configura SUPABASE_URL y SUPABASE_ANON_KEY en supabase-config.js para activar la sincronización.');return;}try{supabaseClient=window.supabase.createClient(cfg.url,cfg.anonKey);const {data,error}=await supabaseClient.auth.getSession();if(error)throw error;currentUser=data.session?.user||null;updateAuthUI();if(currentUser)await loadCloud();else{setCloudStatus('Sin sesión','offline');setAuthMessage('Inicia sesión para sincronizar tus datos entre dispositivos.');}supabaseClient.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;updateAuthUI();if(currentUser)loadCloud();else setCloudStatus('Sin sesión','offline');});}catch(err){console.error('Supabase init:',err);setCloudStatus('Error de conexión','error');setAuthMessage('No se pudo iniciar Supabase: '+(err.message||''));}}
+$('signIn').onclick=async()=>{if(!supabaseClient)return alert('Primero configura Supabase en supabase-config.js.');const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||!password)return alert('Ingresa tu correo y contraseña.');setAuthMessage('Ingresando…');const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error){setAuthMessage(error.message);return alert('No se pudo iniciar sesión: '+error.message)}};
+$('signUp').onclick=async()=>{if(!supabaseClient)return alert('Primero configura Supabase en supabase-config.js.');const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||password.length<8)return alert('Ingresa un correo y una contraseña de al menos 8 caracteres.');setAuthMessage('Creando usuario…');const {data,error}=await supabaseClient.auth.signUp({email,password});if(error){setAuthMessage(error.message);return alert('No se pudo crear el usuario: '+error.message)}if(!data.session)setAuthMessage('Revisa tu correo para confirmar la cuenta y luego inicia sesión.');};
+$('signOut').onclick=async()=>{if(supabaseClient){await supabaseClient.auth.signOut();currentUser=null;updateAuthUI();setCloudStatus('Sin sesión','offline');setAuthMessage('Sesión cerrada. Los datos locales permanecen en este navegador.')}};
+function money(n){return 'S/ '+(Number(n)||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function pct(n){return (Number(n)||0).toLocaleString('es-PE',{minimumFractionDigits:1,maximumFractionDigits:1})+'%'}
+function num(v){return Number(v)||0}
+function ing(id){return state.ingredients.find(x=>x.id===id)}
+function availCost(i){return i.cost/(1-num(i.waste)/100||1)}
+function lineCost(l){let i=ing(l.id);return i?num(l.qty)*availCost(i):0}
+function recCost(r){return r.lines.reduce((s,l)=>s+lineCost(l),0)}
+function netPrice(r){let p=num(r.price);return $('pricesTax').checked?p/1.18:p}
+function fc(r){return netPrice(r)?recCost(r)/netPrice(r)*100:0}
+function goal(){return Math.max(1,num($('goal').value)||30)}
+function sales(){ensure();return state.sales[currentKey()]}
+function stock(){ensure();return state.stock[currentKey()]}
+function totalQty(i){return i.initial+i.buy}
+function avgCost(i){return totalQty(i)>0?(i.initial*ing(i.id).cost+i.buy*i.buyCost)/totalQty(i):ing(i.id).cost}
+function theoretical(id){let total=0;state.recipes.forEach((r,ri)=>{let qty=num(sales()[ri]?.qty);r.lines.forEach(l=>{if(l.id===id)total+=num(l.qty)*qty/(1-num(ing(id)?.waste||0)/100||1)})});return total}
+function actualRows(){return state.ingredients.map((it,idx)=>{let s=stock()[idx]||{initial:0,buy:0,final:0,buyCost:it.cost};let real=s.initial+s.buy-s.final,th=theoretical(it.id),avg=avgCost({...s,id:it.id});return {it,s,real,th,diff:real-th,value:(real-th)*avg,avg}})}
+function totals(){let sold=0,net=0,theory=0,margin=0;state.recipes.forEach((r,i)=>{let q=num(sales()[i]?.qty),n=netPrice(r),c=recCost(r);sold+=q;net+=q*n;theory+=q*c});let real=actualRows().reduce((s,r)=>s+r.real*r.avg,0);return {sold,net,theory,real,fcT:net?theory/net*100:0,fcR:net?real/net*100:0,margin:net-real}}
+function renderSummary(){
+ let t=totals(),g=goal(),diff=t.fcR-t.fcT; $('goalLabel').textContent=pct(g);
+ const top=actualRows().sort((a,b)=>b.value-a.value).slice(0,3);
+ let alert=$('mainAlert');alert.className='alert '+(diff>1?'red':t.fcR>g?'yellow':'green');
+ alert.innerHTML=diff>1?`<strong>Alerta: consumo real supera al teórico en ${pct(diff)}.</strong> Principales desvíos: ${top.map(x=>x.it.name+' ('+money(x.value)+')').join(', ')}.`:t.fcR>g?`<strong>Food Cost real sobre la meta.</strong> El FC real es ${pct(t.fcR)}, frente a una meta de ${pct(g)}.`:`<strong>Control dentro de rango.</strong> La diferencia entre consumo real y teórico es ${pct(diff)}.`;
+ const kpis=[['Ventas netas',money(t.net),'Sin IGV'],['FC teórico',pct(t.fcT),'Costo de receta × ventas'],['FC real',pct(t.fcR),'Consumo de inventario'],['Desviación real vs teórico',(diff>=0?'+':'')+pct(diff),diff>1?'Sobre el umbral de 1 punto':'Puntos porcentuales'],['Margen bruto real',money(t.margin),pct(t.net?t.margin/t.net*100:0)+' sobre venta neta']];
+ $('kpis').innerHTML=kpis.map(x=>`<div class="card"><div class="kpi-label">${x[0]}</div><div class="kpi-value">${x[1]}</div><div class="kpi-sub">${x[2]}</div></div>`).join('');
+ const max=Math.max(g+4,...state.recipes.map(r=>fc(r)),5),scale=Math.max(max,10);
+ $('bars').innerHTML=state.recipes.map(r=>{let f=fc(r),color=f<=g?'#24875c':f<=g+1?'#e0a526':'#c83c32';return `<div class="barrow"><div class="barname">${r.name}</div><div class="track"><div class="fill" style="width:${Math.min(f/scale*100,100)}%;background:${color}"></div><div class="marker" style="left:${Math.min(g/scale*100,100)}%"></div></div><div class="barvalue">${pct(f)}</div></div>`}).join('');
+ $('topDeviations').innerHTML=top.map(x=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)"><div><strong>${x.it.name}</strong><div class="muted" style="font-size:12px">${x.diff>=0?'Sobreconsumo':'Consumo menor al teórico'} · ${x.diff.toFixed(2)} ${x.it.unit}</div></div><strong style="color:${x.value>0?'var(--red)':'var(--green)'}">${money(x.value)}</strong></div>`).join('')||'<p class="muted">Sin desviaciones registradas.</p>';
+ $('dishTable').innerHTML=state.recipes.map((r,i)=>{let q=num(sales()[i]?.qty),n=netPrice(r),c=recCost(r),sugg=c/(goal()/100),display=$('pricesTax').checked?sugg*1.18:sugg;return `<tr><td><strong>${r.name}</strong></td><td class="num">${q}</td><td class="num">${money(r.price)}</td><td class="num">${money(c)}</td><td class="num">${pct(fc(r))}</td><td class="num">${money(q?actualRows().reduce((s,x)=>s+x.value,0)/Math.max(t.sold,1)+c: c)}</td><td class="num"><strong>${money(display)}</strong></td></tr>`}).join('');
+}
+function renderIngredients(){ $('ingredientTable').innerHTML=state.ingredients.map((i,idx)=>`<tr><td><input data-ing="${i.id}" data-field="name" value="${esc(i.name)}"></td><td><select data-ing="${i.id}" data-field="unit">${['kg','g','L','ml','unidad','porción'].map(u=>`<option ${u===i.unit?'selected':''}>${u}</option>`).join('')}</select></td><td><input type="number" min="0" step=".01" data-ing="${i.id}" data-field="cost" value="${i.cost}"></td><td><input type="number" min="0" max="99.9" step=".1" data-ing="${i.id}" data-field="waste" value="${i.waste}"></td><td class="num"><strong>${money(availCost(i))}</strong> / ${i.unit}</td><td><button class="danger small" data-remove-ing="${i.id}">Eliminar</button></td></tr>`).join('')}
+function renderRecipe(){let r=state.recipes[selectedRecipe];if(!r)return;$('recipeList').innerHTML=state.recipes.map((x,i)=>`<button class="recipe-pick ${i===selectedRecipe?'selected':''}" data-pick="${i}">${esc(x.name)}</button>`).join('');$('recipeName').value=r.name;$('recipePrice').value=r.price;
+ $('recipeLines').innerHTML=r.lines.map((l,i)=>{let it=ing(l.id)||state.ingredients[0],c=lineCost(l);return `<tr><td><select data-line="${i}" data-field="id">${state.ingredients.map(x=>`<option value="${x.id}" ${x.id===l.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></td><td>${it?.unit||'—'}</td><td><input type="number" min="0" step=".001" data-line="${i}" data-field="qty" value="${l.qty}"></td><td class="num">${money(c)}</td><td class="num">${pct(recCost(r)?c/recCost(r)*100:0)}</td><td><button class="danger small" data-remove-line="${i}">×</button></td></tr>`}).join('');
+ let c=recCost(r),n=netPrice(r),p=c/(goal()/100),gross=$('pricesTax').checked?p*1.18:p;
+ $('recipeMetrics').innerHTML=[['Costo por porción',money(c)],['Precio neto',money(n)],['Food Cost',pct(fc(r))],['Margen bruto',money(n-c)],['Precio sugerido',money(gross)]].map(x=>`<div class="mini"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join('');
+}
+function renderActual(){const active=document.activeElement;let restore=null;if(active&&active.matches('input[data-sale],input[data-stock]')){restore={sale:active.dataset.sale,stock:active.dataset.stock,field:active.dataset.field,start:active.selectionStart,end:active.selectionEnd};}let t=totals();$('salesTable').innerHTML=state.recipes.map((r,i)=>{let q=num(sales()[i]?.qty);return `<tr><td>${esc(r.name)}</td><td><input type="number" min="0" step="1" data-sale="${i}" value="${q}"></td><td class="num">${money(q*netPrice(r))}</td><td class="num">${money(q*recCost(r))}</td></tr>`}).join('');
+ $('actualTable').innerHTML=actualRows().map((x,i)=>`<tr><td><strong>${esc(x.it.name)}</strong></td><td>${x.it.unit}</td><td><input type="number" min="0" step=".001" data-stock="${i}" data-field="initial" value="${x.s.initial}"></td><td><input type="number" min="0" step=".001" data-stock="${i}" data-field="buy" value="${x.s.buy}"></td><td><input type="number" min="0" step=".001" data-stock="${i}" data-field="final" value="${x.s.final}"></td><td class="num">${x.real.toFixed(3)}</td><td class="num">${x.th.toFixed(3)}</td><td class="num"><span class="badge ${x.diff>0?'bad':x.diff<0?'good':''}">${x.diff>0?'+':''}${x.diff.toFixed(3)}</span></td><td class="num"><strong style="color:${x.value>0?'var(--red)':'var(--green)'}">${money(x.value)}</strong></td></tr>`).join('');
+if(restore){let selector=restore.sale!==undefined?`input[data-sale="${restore.sale}"]`:`input[data-stock="${restore.stock}"][data-field="${restore.field}"]`;let next=document.querySelector(selector);if(next){next.focus();try{next.setSelectionRange(restore.start,restore.end)}catch(e){}}}
+
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderAll(){ensure();renderSummary();renderIngredients();renderRecipe();renderActual();save()}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));}));
+['brand','unit','period'].forEach(id=>$(id).addEventListener('change',renderAll));
+$('goal').addEventListener('input',()=>{renderSummary();renderRecipeMetricsOnly();save()});$('pricesTax').addEventListener('change',renderAll);
+function renderRecipeMetricsOnly(){let r=state.recipes[selectedRecipe];if(!r)return;let c=recCost(r),n=netPrice(r),p=c/(goal()/100);$('recipeMetrics').innerHTML=[['Costo por porción',money(c)],['Precio neto',money(n)],['Food Cost',pct(fc(r))],['Margen bruto',money(n-c)],['Precio sugerido',money($('pricesTax').checked?p*1.18:p)]].map(x=>`<div class="mini"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join('');}
+document.addEventListener('input',e=>{let el=e.target;
+ if(el.dataset.ing){let i=ing(el.dataset.ing);i[el.dataset.field]=['cost','waste'].includes(el.dataset.field)?num(el.value):el.value;renderSummary();renderRecipeMetricsOnly();renderActual();save();}
+ if(el.dataset.line!==undefined){let r=state.recipes[selectedRecipe],l=r.lines[+el.dataset.line];l[el.dataset.field]=el.dataset.field==='qty'?num(el.value):el.value;renderSummary();renderRecipeMetricsOnly();renderActual();save();}
+ if(el.id==='recipeName'){state.recipes[selectedRecipe].name=el.value;renderSummary();renderActual();save();let picked=document.querySelector(`[data-pick="${selectedRecipe}"]`);if(picked)picked.textContent=el.value;}
+ if(el.id==='recipePrice'){state.recipes[selectedRecipe].price=num(el.value);renderSummary();renderRecipeMetricsOnly();renderActual();save();}
+ if(el.dataset.sale!==undefined){sales()[+el.dataset.sale].qty=num(el.value);renderSummary();renderActual();save();}
+ if(el.dataset.stock!==undefined){let s=stock()[+el.dataset.stock];s[el.dataset.field]=num(el.value);renderSummary();renderActual();save();}
+});
+document.addEventListener('change',e=>{let el=e.target;if(el.dataset.line!==undefined||el.dataset.ing){renderAll();} });
+document.addEventListener('click',e=>{let el=e.target.closest('button');if(!el)return;
+ if(el.dataset.pick!==undefined){selectedRecipe=+el.dataset.pick;renderRecipe();}
+ if(el.dataset.removeIng){let id=el.dataset.removeIng;state.ingredients=state.ingredients.filter(x=>x.id!==id);state.recipes.forEach(r=>r.lines=r.lines.filter(l=>l.id!==id));renderAll();}
+ if(el.dataset.removeLine!==undefined){state.recipes[selectedRecipe].lines.splice(+el.dataset.removeLine,1);renderRecipe();renderSummary();renderActual();save();}
+});
+$('addIngredient').onclick=()=>{state.ingredients.push({id:uid(),name:'Nuevo insumo',unit:'kg',cost:0,waste:0});renderAll()};
+$('addRecipe').onclick=()=>{state.recipes.push({name:'Nueva receta',price:0,lines:[]});selectedRecipe=state.recipes.length-1;renderAll()};
+$('deleteRecipe').onclick=()=>{if(state.recipes.length<2)return alert('Debe existir al menos una receta.');state.recipes.splice(selectedRecipe,1);selectedRecipe=Math.max(0,selectedRecipe-1);renderAll()};
+$('addRecipeLine').onclick=()=>{if(!state.ingredients.length)return;state.recipes[selectedRecipe].lines.push({id:state.ingredients[0].id,qty:0});renderRecipe();renderSummary();renderActual();save()};
+$('export').onclick=()=>{let blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='food-cost-datos.json';a.click();URL.revokeObjectURL(a.href)};
+$('importBtn').onclick=()=>$('importFile').click();
+$('importFile').onchange=async e=>{try{let data=JSON.parse(await e.target.files[0].text());if(!data.ingredients||!data.recipes)throw Error();state=data;selectedRecipe=0;renderAll()}catch(err){alert('No se pudo importar: verifica que sea un respaldo Food Cost válido.')}e.target.value=''};
+$('reset').onclick=()=>{if(confirm('¿Restaurar los datos de ejemplo? Se reemplazarán los datos guardados en este navegador.')){state=JSON.parse(JSON.stringify(seed));setLines();selectedRecipe=0;renderAll()}};
+try{let saved=localStorage.getItem('foodcost-control-v1');if(saved){let parsed=JSON.parse(saved);if(parsed.ingredients&&parsed.recipes){state=parsed;}}}catch(e){}
+renderAll();initCloud();
+</script></body></html>
